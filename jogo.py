@@ -10,6 +10,7 @@ class Palavra:
         self.erros_restantes = 6
         self.letras_certas = set()
         self.letras_erradas = set()
+        self.pontos = 0  # Pontuação removida da lógica fixa
 
     def tentar_letra(self, letra):
         letra = letra.lower()
@@ -37,7 +38,6 @@ class Palavra:
     def venceu(self):
         return '_' not in self.representacao
 
-
 # -------- Funções auxiliares --------
 def carregar_palavras(arquivo):
     if not os.path.exists(arquivo):
@@ -46,15 +46,50 @@ def carregar_palavras(arquivo):
         return [linha.strip() for linha in f if linha.strip()]
 
 def salvar_pontuacao(nome, venceu):
-    with open("pontuacoes.txt", "a", encoding="utf-8") as f:
-        resultado = "Vitória" if venceu else "Derrota"
-        f.write(f"{nome}: {resultado}\n")
+    pontuacoes = {}
 
+    if os.path.exists("pontuacoes.txt"):
+        with open("pontuacoes.txt", "r", encoding="utf-8") as f:
+            for linha in f:
+                linha = linha.strip()
+                if not linha: 
+                    continue
+                partes = linha.split(":")
+                jogador = partes[0].strip()
+                dados = partes[1].strip().split("|")
+                vitorias = int(dados[0].strip().split()[1])
+                derrotas = int(dados[1].strip().split()[1])
+                pontuacoes[jogador] = {"vit": vitorias, "der": derrotas}
+
+    if nome not in pontuacoes:
+        pontuacoes[nome] = {"vit": 0, "der": 0}
+    if venceu:
+        pontuacoes[nome]["vit"] += 1
+    else:
+        pontuacoes[nome]["der"] += 1
+
+    with open("pontuacoes.txt", "w", encoding="utf-8") as f:
+        for jogador, valores in pontuacoes.items():
+            f.write(f"{jogador}: Vitórias {valores['vit']} | Derrotas {valores['der']}\n")
+
+def mostrar_pontuacoes_popup():
+    if not os.path.exists("pontuacoes.txt"):
+        messagebox.showinfo("Pontuações", "Nenhuma pontuação registrada ainda.")
+        return
+    with open("pontuacoes.txt", "r", encoding="utf-8") as f:
+        conteudo = f.read()
+    messagebox.showinfo("Pontuações", conteudo)
+
+def mostrar_pontuacoes_fim():
+    if not os.path.exists("pontuacoes.txt"):
+        return "Nenhuma pontuação registrada ainda."
+    with open("pontuacoes.txt", "r", encoding="utf-8") as f:
+        return f.read()
 
 # -------- Funções do Jogo --------
 def iniciar_jogo():
     global jogo, nome
-    palavras = carregar_palavras(r"Palavras.txt")
+    palavras = carregar_palavras("palavras.txt")
     if not palavras:
         messagebox.showerror("Erro", "Arquivo 'palavras.txt' não encontrado ou vazio.")
         return
@@ -66,7 +101,6 @@ def iniciar_jogo():
     entrada_letra.config(state="normal")
     entrada_letra.focus()
     botao_tentar.config(state="normal")
-
 
 def tentar_letra():
     global jogo
@@ -84,20 +118,32 @@ def tentar_letra():
     if jogo.jogo_terminado():
         entrada_letra.config(state="disabled")
         botao_tentar.config(state="disabled")
-        salvar_pontuacao(nome, jogo.venceu())
-        if jogo.venceu():
-            messagebox.showinfo("Vitória!", f"Parabéns {nome}, você venceu!")
-        else:
-            messagebox.showinfo("Derrota", f"{nome}, você perdeu!\nA palavra era: {jogo.palavra_secreta}")
 
+        if jogo.venceu():
+            salvar_pontuacao(nome, True)
+            pontuacoes = mostrar_pontuacoes_fim()
+            messagebox.showinfo("Vitória!", f"Parabéns {nome}, você venceu!\n\nPontuações:\n{pontuacoes}")
+        else:
+            salvar_pontuacao(nome, False)
+            pontuacoes = mostrar_pontuacoes_fim()
+            messagebox.showinfo("Derrota", f"{nome}, você perdeu!\nA palavra era: {jogo.palavra_secreta}\n\nPontuações:\n{pontuacoes}")
+
+def reiniciar_jogo():
+    entrada_letra.config(state="disabled")
+    botao_tentar.config(state="disabled")
+    palavra_var.set("")
+    erros_var.set("")
+    letras_var.set("")
+    pontos_var.set("")
+    status_var.set("Clique em Iniciar Jogo para começar.")
 
 def atualizar_tela():
     palavra_var.set(jogo.palavra_atual())
     erros_var.set(f"Erros restantes: {jogo.erros_restantes}")
     letras_var.set(f"Erradas: {' '.join(sorted(jogo.letras_erradas))}")
+    pontos_var.set(f"Pontos: {jogo.pontos}")
 
-
-# -------- Funções do Aparencia --------
+# -------- Funções do Aparência --------
 def aplicar_tema():
     bg = "#121212" if tema_escuro else "#f0f0f0"
     fg = "#EEEEEE" if tema_escuro else "#000000"
@@ -115,6 +161,7 @@ def aplicar_tema():
     status_label.config(bg=bg, fg=azul)
     erros_label.config(bg=bg, fg=vermelho)
     letras_label.config(bg=bg, fg=fg)
+    pontos_label.config(bg=bg, fg=verde)
 
     entrada_nome.config(bg=entrada_bg, fg=entrada_fg, insertbackground=entrada_fg)
     entrada_letra.config(bg=entrada_bg, fg=entrada_fg, insertbackground=entrada_fg)
@@ -128,14 +175,12 @@ def alternar_tema():
     tema_escuro = not tema_escuro
     aplicar_tema()
 
-
-
 # -------- Interface gráfica --------
 janela = Tk()
 janela.geometry("900x600")
 janela.title("Jogo da Forca")
-janela.configure(bg="#f0f0f0")
-# Centralizar janela na tela
+
+# Centralizar janela
 largura = 900
 altura = 600
 largura_tela = janela.winfo_screenwidth()
@@ -149,6 +194,7 @@ palavra_var = StringVar()
 status_var = StringVar()
 erros_var = StringVar()
 letras_var = StringVar()
+pontos_var = StringVar()
 nome = ""
 jogo = None
 tema_escuro = False
@@ -168,7 +214,6 @@ palavra_label.pack(pady=20)
 
 entrada_letra = Entry(janela, font=("Arial", 12), width=5, justify='center', state="disabled")
 entrada_letra.pack()
-
 entrada_letra.bind("<Return>", lambda event: tentar_letra())
 
 botao_tentar = Button(janela, text="Tentar letra", font=("Arial", 11), width=15, command=tentar_letra, state="disabled")
@@ -176,6 +221,12 @@ botao_tentar.pack(pady=5)
 
 botao_iniciar = Button(janela, text="Iniciar Jogo", font=("Arial", 11), width=15, command=iniciar_jogo)
 botao_iniciar.pack(pady=10)
+
+botao_reiniciar = Button(janela, text="Reiniciar", font=("Arial", 11), bg="#888888", fg="white", command=reiniciar_jogo, width=15)
+botao_reiniciar.pack(pady=5)
+
+botao_pontuacoes = Button(janela, text="Ver Pontuações", font=("Arial", 11), bg="#6666cc", fg="white", command=mostrar_pontuacoes_popup, width=15)
+botao_pontuacoes.pack(pady=5)
 
 status_label = Label(janela, textvariable=status_var, font=("Arial", 12))
 status_label.pack(pady=5)
@@ -186,14 +237,14 @@ erros_label.pack()
 letras_label = Label(janela, textvariable=letras_var, font=("Arial", 12))
 letras_label.pack(pady=5)
 
+pontos_label = Label(janela, textvariable=pontos_var, font=("Arial", 12))
+pontos_label.pack(pady=5)
+
 botao_tema = Button(janela, text="Alternar Tema", font=("Arial", 10), command=alternar_tema)
 botao_tema.pack(pady=15)
+
 aplicar_tema()
-
-
-
-# Mensagem inicial
 status_var.set("Digite seu nome e clique em Iniciar Jogo.")
 
-# Loop principal
+
 janela.mainloop()
