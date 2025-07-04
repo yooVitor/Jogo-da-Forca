@@ -5,19 +5,22 @@ from tkinter import Tk, Label, Button, Entry, StringVar, messagebox
 # -------- Classe Palavra --------
 class Palavra:
     def __init__(self, palavra_secreta):
+        # Inicializa com a palavra secreta em minúsculas
         self.palavra_secreta = palavra_secreta.lower()
-        self.representacao = ['_' for _ in self.palavra_secreta]
-        self.erros_restantes = 6
-        self.letras_certas = set()
-        self.letras_erradas = set()
-        self.pontos = 0  # Pontuação removida da lógica fixa
+        self.representacao = ['_' for _ in self.palavra_secreta]  # Palavra oculta com underlines
+        self.erros_restantes = 6  # Número máximo de erros
+        self.letras_certas = set()  # Letras acertadas
+        self.letras_erradas = set()  # Letras erradas
+        self.pontos = 0  # Pontuação (inicialmente não usada)
 
     def tentar_letra(self, letra):
         letra = letra.lower()
 
+        # Verifica se a letra já foi tentada
         if letra in self.letras_certas or letra in self.letras_erradas:
             return "Letra já tentada."
 
+        # Se acertar a letra
         if letra in self.palavra_secreta:
             self.letras_certas.add(letra)
             for i, l in enumerate(self.palavra_secreta):
@@ -25,6 +28,7 @@ class Palavra:
                     self.representacao[i] = letra
             return "Acertou!"
         else:
+            # Se errar, decrementa os erros restantes
             self.letras_erradas.add(letra)
             self.erros_restantes -= 1
             return "Errou!"
@@ -33,6 +37,7 @@ class Palavra:
         return " ".join(self.representacao)
 
     def jogo_terminado(self):
+        # Jogo termina por derrota (sem erros restantes) ou vitória (sem underlines)
         return self.erros_restantes == 0 or '_' not in self.representacao
 
     def venceu(self):
@@ -40,14 +45,17 @@ class Palavra:
 
 # -------- Funções auxiliares --------
 def carregar_palavras(arquivo):
+    # Lê palavras do arquivo e retorna uma lista
     if not os.path.exists(arquivo):
         return []
     with open(arquivo, 'r', encoding='utf-8') as f:
         return [linha.strip() for linha in f if linha.strip()]
 
 def salvar_pontuacao(nome, venceu):
+    # Salva o resultado do jogador no arquivo de pontuações
     pontuacoes = {}
 
+    # Lê pontuações existentes
     if os.path.exists("pontuacoes.txt"):
         with open("pontuacoes.txt", "r", encoding="utf-8") as f:
             for linha in f:
@@ -61,6 +69,7 @@ def salvar_pontuacao(nome, venceu):
                 derrotas = int(dados[1].strip().split()[1])
                 pontuacoes[jogador] = {"vit": vitorias, "der": derrotas}
 
+    # Atualiza ou cria entrada do jogador
     if nome not in pontuacoes:
         pontuacoes[nome] = {"vit": 0, "der": 0}
     if venceu:
@@ -68,11 +77,13 @@ def salvar_pontuacao(nome, venceu):
     else:
         pontuacoes[nome]["der"] += 1
 
+    # Salva de volta no arquivo
     with open("pontuacoes.txt", "w", encoding="utf-8") as f:
         for jogador, valores in pontuacoes.items():
             f.write(f"{jogador}: Vitórias {valores['vit']} | Derrotas {valores['der']}\n")
 
 def mostrar_pontuacoes_popup():
+    # Mostra pontuações em uma janela popup
     if not os.path.exists("pontuacoes.txt"):
         messagebox.showinfo("Pontuações", "Nenhuma pontuação registrada ainda.")
         return
@@ -81,6 +92,7 @@ def mostrar_pontuacoes_popup():
     messagebox.showinfo("Pontuações", conteudo)
 
 def mostrar_pontuacoes_fim():
+    # Retorna as pontuações como string (exibido no final do jogo)
     if not os.path.exists("pontuacoes.txt"):
         return "Nenhuma pontuação registrada ainda."
     with open("pontuacoes.txt", "r", encoding="utf-8") as f:
@@ -88,6 +100,7 @@ def mostrar_pontuacoes_fim():
 
 # -------- Funções do Jogo --------
 def iniciar_jogo():
+    # Inicia o jogo, escolhe uma palavra aleatória e reseta a interface
     global jogo, nome
     palavras = carregar_palavras("palavras.txt")
     if not palavras:
@@ -103,6 +116,7 @@ def iniciar_jogo():
     botao_tentar.config(state="normal")
 
 def tentar_letra():
+    # Lida com a tentativa de letra pelo jogador
     global jogo
     letra = entrada_letra.get().lower()
     entrada_letra.delete(0, 'end')
@@ -129,6 +143,7 @@ def tentar_letra():
             messagebox.showinfo("Derrota", f"{nome}, você perdeu!\nA palavra era: {jogo.palavra_secreta}\n\nPontuações:\n{pontuacoes}")
 
 def reiniciar_jogo():
+    # Limpa a interface para um novo jogo
     entrada_letra.config(state="disabled")
     botao_tentar.config(state="disabled")
     palavra_var.set("")
@@ -138,23 +153,26 @@ def reiniciar_jogo():
     status_var.set("Clique em Iniciar Jogo para começar.")
 
 def atualizar_tela():
+    # Atualiza os elementos da interface com o estado atual do jogo
     palavra_var.set(jogo.palavra_atual())
     erros_var.set(f"Erros restantes: {jogo.erros_restantes}")
     letras_var.set(f"Erradas: {' '.join(sorted(jogo.letras_erradas))}")
     pontos_var.set(f"Pontos: {jogo.pontos}")
 
-# -------- Funções do Aparência --------
+# -------- Funções de Aparência --------
 def aplicar_tema():
-    bg = "#121212" if tema_escuro else "#f0f0f0"
-    fg = "#EEEEEE" if tema_escuro else "#000000"
+    # Aplica o tema escuro ou claro na interface
+    bg = "#121212" if tema_escuro else "#eeeeee"
+    fg = "#EEEEEE" if tema_escuro else "#212121"
     entrada_bg = "#1E1E1E" if tema_escuro else "white"
     entrada_fg = "#EEEEEE" if tema_escuro else "black"
-    azul = "#1E88E5"
-    verde = "#43A047"
+    azul = "#2196F3"
+    verde = "#4CAF50"
     vermelho = "#E53935"
 
     janela.configure(bg=bg)
 
+    # Atualiza os elementos com as cores apropriadas
     titulo.config(bg=bg, fg=fg)
     nome_label.config(bg=bg, fg=fg)
     palavra_label.config(bg=bg, fg=fg)
@@ -166,11 +184,12 @@ def aplicar_tema():
     entrada_nome.config(bg=entrada_bg, fg=entrada_fg, insertbackground=entrada_fg)
     entrada_letra.config(bg=entrada_bg, fg=entrada_fg, insertbackground=entrada_fg)
 
-    botao_tentar.config(bg=verde, fg="white", activebackground="#388E3C")
-    botao_iniciar.config(bg=azul, fg="white", activebackground="#1565C0")
+    botao_tentar.config(bg=verde, fg="white", activebackground="#45A049")
+    botao_iniciar.config(bg=azul, fg="white", activebackground="#1976D2")
     botao_tema.config(bg="#888888", fg="white", activebackground="#555555")
 
 def alternar_tema():
+    # Alterna entre o tema claro e escuro
     global tema_escuro
     tema_escuro = not tema_escuro
     aplicar_tema()
@@ -180,7 +199,7 @@ janela = Tk()
 janela.geometry("900x600")
 janela.title("Jogo da Forca")
 
-# Centralizar janela
+# Centraliza a janela na tela
 largura = 900
 altura = 600
 largura_tela = janela.winfo_screenwidth()
@@ -189,7 +208,7 @@ pos_x = (largura_tela // 2) - (largura // 2)
 pos_y = (altura_tela // 2) - (altura // 2)
 janela.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
 
-# Variáveis
+# Variáveis de estado
 palavra_var = StringVar()
 status_var = StringVar()
 erros_var = StringVar()
@@ -199,7 +218,7 @@ nome = ""
 jogo = None
 tema_escuro = False
 
-# Widgets
+# Criação dos widgets da interface
 titulo = Label(janela, text="🎯 Jogo da Forca", font=("Arial Black", 26))
 titulo.pack(pady=20)
 
@@ -222,10 +241,10 @@ botao_tentar.pack(pady=5)
 botao_iniciar = Button(janela, text="Iniciar Jogo", font=("Arial", 11), width=15, command=iniciar_jogo)
 botao_iniciar.pack(pady=10)
 
-botao_reiniciar = Button(janela, text="Reiniciar", font=("Arial", 11), bg="#888888", fg="white", command=reiniciar_jogo, width=15)
+botao_reiniciar = Button(janela, text="Reiniciar", font=("Arial", 11), bg="#9E9E9E", activebackground="#757575", fg="white", command=reiniciar_jogo, width=15)
 botao_reiniciar.pack(pady=5)
 
-botao_pontuacoes = Button(janela, text="Ver Pontuações", font=("Arial", 11), bg="#6666cc", fg="white", command=mostrar_pontuacoes_popup, width=15)
+botao_pontuacoes = Button(janela, text="Ver Pontuações", font=("Arial", 11), bg="#673AB7", activebackground="#5E35B1", fg="white", command=mostrar_pontuacoes_popup, width=15)
 botao_pontuacoes.pack(pady=5)
 
 status_label = Label(janela, textvariable=status_var, font=("Arial", 12))
@@ -243,8 +262,9 @@ pontos_label.pack(pady=5)
 botao_tema = Button(janela, text="Alternar Tema", font=("Arial", 10), command=alternar_tema)
 botao_tema.pack(pady=15)
 
+# Aplica o tema e mostra a mensagem inicial
 aplicar_tema()
 status_var.set("Digite seu nome e clique em Iniciar Jogo.")
 
-
+# Inicia o loop principal da interface
 janela.mainloop()
