@@ -1,3 +1,5 @@
+# Desenvolvido por: Vitor Gomes e Raian Souza
+
 import random
 import os
 from tkinter import Tk, Label, Button, Entry, StringVar, messagebox
