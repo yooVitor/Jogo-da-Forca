@@ -1,4 +1,4 @@
-# Desenvolvido por: Vitor Gomes e Raian Souza
+# Desenvolvido por: Vitor Silva Gomes, Raian Souza, Luis Vicente, Thiago Victor da Silva e Paulo Roberto
 
 import random
 import os
