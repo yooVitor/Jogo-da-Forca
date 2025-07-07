@@ -1,7 +1,8 @@
 # 🎯 Jogo da Forca - Interface Gráfica em Python
 
 Um jogo da forca interativo com interface gráfica desenvolvida em Python usando **Tkinter**. O jogador tenta adivinhar uma palavra secreta, com feedback visual, contagem de erros e sistema de pontuação persistente.
-<iframe width="1319" height="742" src="https://www.youtube.com/embed/7Bi2soEeWp0" title="Jogo da Forca Animação" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Jogo da Forca - Animação](https://img.youtube.com/vi/7Bi2soEeWp0/0.jpg)](https://www.youtube.com/watch?v=7Bi2soEeWp0)
+
 
 
 ---
