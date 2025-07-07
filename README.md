@@ -30,7 +30,7 @@ Um jogo da forca interativo com interface gráfica desenvolvida em Python usando
 
 ## 📂 Estrutura de Arquivos
 
-- `main.py` — Código fonte principal do jogo
+- `jogo.py` — Código fonte principal do jogo
 - `palavras.txt` — Arquivo de texto com a lista de palavras para o jogo
 - `pontuacoes.txt` — Arquivo gerado automaticamente para armazenar pontuações
 

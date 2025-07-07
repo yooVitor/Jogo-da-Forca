@@ -50,7 +50,9 @@ def carregar_palavras(arquivo):
     # Lê palavras do arquivo e retorna uma lista
     if not os.path.exists(arquivo):
         return []
-    with open(arquivo, 'r', encoding='utf-8') as f:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    caminho = os.path.join(base_dir, "palavras.txt")
+    with open(caminho, "r", encoding="utf-8") as f:
         return [linha.strip() for linha in f if linha.strip()]
 
 def salvar_pontuacao(nome, venceu):
