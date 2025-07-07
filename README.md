@@ -1,7 +1,7 @@
 # 🎯 Jogo da Forca - Interface Gráfica em Python
 
 Um jogo da forca interativo com interface gráfica desenvolvida em Python usando **Tkinter**. O jogador tenta adivinhar uma palavra secreta, com feedback visual, contagem de erros e sistema de pontuação persistente.
-<video controls style="width: 100%; max-width: 100%; height: auto;"><source src="assets/Jogo da Forca.mp4" type="video/mp4"></video>
+<video src="assets/Jogo da Forca.mp4" style="width: 100%; max-width: 100%; height: auto;" controls></video>
 
 ---
 
@@ -37,7 +37,10 @@ Um jogo da forca interativo com interface gráfica desenvolvida em Python usando
 ## 🚀 Como executar
 
 1. Tenha o Python 3 instalado no seu sistema.
-2. Certifique-se de que os arquivos `main.py` e `palavras.txt` estão na mesma pasta.
+2. Certifique-se de que os arquivos `jogo.py` e `palavras.txt` estão na mesma pasta.
+3. No VS Code, clique em Arquivo > Abrir Pasta...
+4. Selecione a pasta "JOGO DA FORCA" (não a pasta assets, nem o jogo.py sozinho).
+5. Depois disso, execute o jogo.py.
 
 ## 💡 Personalizações
 
